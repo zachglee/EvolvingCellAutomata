@@ -37,14 +37,16 @@ Together the `Action` and `Direction` form a `Behavior`. (I wrapped those two up
 
 So our example gene would look like this:
 
-`{
-  name: "RunAway",  
-  behavior: {  
-             direction: 2, //recall 2 refers to Down  
-             action: Move  
-            }  
-  matchers: [Cell, Any, Empty, Any]  
-}`
+```
+{
+  name: "RunAway",
+  behavior: {
+             direction: 2, //recall 2 refers to Down
+             action: Move
+            }
+  matchers: [Cell, Any, Empty, Any]
+}
+```
 
 So what I said about the gene's `Behavior` is true, but it actually will perform its `Behavior` in more than just that case. For example it will also perform its `Behavior` under the following circumstances:
 
