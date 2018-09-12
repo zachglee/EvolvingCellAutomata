@@ -1,4 +1,8 @@
 //A World is a (board[][], tickNum, settings)
+//It provides a tick() and draw(), which are the bread and butter of the simulation.
+//Also has a bunch of convenience methods to give other code a nice interface to use when
+//it wants to access or modify the World.
+
 class World {
 	constructor(board, tickNum, settings) {
 		this.board = board;
@@ -46,6 +50,9 @@ class World {
 		}
 	}
 
+	//performs one tick of the world
+	//aka goes through the board and finds all tickable GameObjects, then tick()'s them with the proper arguments
+	//also executes some World logic, like checking if any cells have decayed enough that they become Obstacles.
 	tick() {
 		for (var i = 0; i < FOOD_SQUARES_PER_TICK; i++) {
 			this.spawnFood(this.randomPosn(), FOOD_PER_SQUARE);
@@ -63,7 +70,7 @@ class World {
 						this.cellStats.cellDied(cell); //let the stats object know a cell died so it can update
 						square.food += BODY_COST;
 					} else {
-						toTick.push({cell: cell, posn: new Posn(i, j)});
+						toTick.push({cell: cell, posn: new Posn(i, j)}); //add it to our list of cells to tick()
 					}
 				}
 			}
@@ -106,6 +113,7 @@ class World {
 		}
 	}
 
+	//renders this World on the given ctx (context object from an HTML5 canvas)
 	draw(ctx) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		//for every square on the board
@@ -125,44 +133,5 @@ class World {
 	togglePause() {
 		this.paused = !this.paused;
 	}
-	//
 
-	/*run(ticks) {
-		for (var i = 0; i < ticks; i++) {
-			this.tick();
-		}
-
-		//count who did the best?
-	}
-
-	runWithRendering(ticks) {
-		const doneRunning = $.Deferred();
-		var theWorld = this;
-		setIntervalX(function() {
-			theWorld.tick();
-			theWorld.draw(ctx);
-		}, 8, ticks, function() {
-			doneRunning.resolve();
-		})
-		return doneRunning;
-	}*/
- 
-	getSurvivingSpecies() {
-		var seenSpecies = []; //a list of cell colors
-		var survivingSpecies = [];
-		for (var i = 0; i < this.board.length; i++) {
-			var column = this.board[i];
-			for (var j = 0; j < column.length; j++) {
-				var square = column[j];
-				if (square && square.content && square.content.isCell) { //if it's a cell...
-					var cell = square.content;
-					if (seenSpecies.indexOf(cell.color) <= -1 && cell.food > 0) { //as long as we haven't already seen this species
-						seenSpecies.push(cell.color) //now we've seen it
-						survivingSpecies.push(cell); //add it to the list
-					}
-				}
-			}
-		}
-		return survivingSpecies;
-	}
 }

@@ -14,10 +14,8 @@ class Cell extends GameObject {
 		this.isCell = true;
 		this.birthtick = birthtick;
 		this.age = 0;
-		this.startTickingFromGene = 0;
-		this.decay = 0;
-		this.reproductionsLeft = 8;
-		this.reproductionsDone = 0;
+		this.startTickingFromGene = 0; //maybe obsolete?
+		this.decay = 0; //how long the cell has spent with food < 0
 		this.maxFood = MAX_CELL_FOOD;
 	}
 
