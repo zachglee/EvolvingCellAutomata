@@ -1,0 +1,430 @@
+<html>
+
+<head></head>
+
+<body>
+	<input type="text" value="food squares per tick" id="foodSquaresPerTick"></input>
+	<!-- <input type="text" value="tick10" onclick="buttonTickTen()"></input>
+	<input type="text" value="tick100" onclick="buttonTickHundred()"></input> -->
+	<input type="button" value="set" onclick="set()"></input>
+	<table>
+		<tr>
+			<td></td>
+			<td>
+				<select class="actionSelect" data-direction="0">
+					<option value="none">None</option>
+				</select>
+				<select class="matcherSelect" data-direction="0">
+					<option value="any">Any</option>
+				</select>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>
+				<select class="actionSelect" data-direction="3">
+					<option value="none">None</option>
+				</select>
+				<select class="matcherSelect" data-direction="3">
+					<option value="any">Any</option>
+				</select>
+			</td>
+			<td>
+				<input id="addGeneButton" type="button" value="Add Gene"></input>
+				<input id="spawnCellButton" type="button" value="Spawn Cell"></input>
+				<input id="newCellButton" type="button" value="New Cell"></input>
+			</td>
+			<td>
+				<select class="actionSelect" data-direction="1">
+					<option value="none">None</option>
+				</select>
+				<select class="matcherSelect" data-direction="1">
+					<option value="any">Any</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<select class="actionSelect" data-direction="2">
+					<option value="none">None</option>
+				</select>
+				<select class="matcherSelect" data-direction="2">
+					<option value="any">Any</option>
+				</select>
+			</td>
+			<td></td>
+		</tr>
+	</table>
+	<input id="genOrgFromGPButton" type="button" value="Gen Org From Gene Pool"></input>
+
+</body>
+
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/chart.bundle.js"></script>
+
+<!-- -->
+<script src="js/Utils.js"></script>
+
+<!-- M O D E L -->
+<script src="js/GameObject.js"></script>
+<script src="js/Obstacle.js"></script>
+<script src="js/Square.js"></script>
+<script src="js/Behavior.js"></script>
+<script src="js/Gene.js"></script>
+<script src="js/Cell.js"></script>
+<script src="js/CellBuilder.js"></script>
+<script src="js/CellStats.js"></script>
+<script src="js/World.js"></script>
+
+<!-- D E F I N I T I O N S -->
+<script src="js/Actions.js"></script>
+<script src="js/EnvMatchers.js"></script>
+
+<script src="js/GeneGeneration.js"></script>
+
+<script>
+
+// -------- T O D O -------- //
+
+// - Make sexual reproduction
+// - Decouple drawing logic from the individual files... Orrr maybe not
+// - make chromosome system
+// - make colors be unique identification
+// - optimize so it's not slow
+// - make customizable
+// - optimize and cleanup this mess
+// - i need specializations like x action is really cheap for you, etc
+// - Properties, like being good at eating food or photosynthesis / bad at other stuff, maybe based on genes
+// - terrain differences, benefits/advantages for being next to/away from walls
+// - clean up all the misc stuff and rules i have
+// - irregular food sources
+// - have a behavior that lasts multiple ticks -- like first you do x, then you do y, then you do z, so action list can be over multiple ticks?
+// - implement screen wraparound
+// - variable food function
+// - irreversible changes to terrain, like how much movement costs
+// - again no one guy should be able to use up all the resources
+// - reproduce at food cap
+// - make graphs once we're in a good place
+// - figure out what to do about dud target cases for actions
+// - maybe I need to artificially limit what actions each species can take
+// - ahh what if its easy to mutate and get dif env-matchers of your stuff, but really hard to mutate and get a different action? Right now there's no commitment to specialization
+// - food landing on obstacles rolls off?
+// - need a way to encourage the predator prey competition pressure
+// - address the tendency to always go right
+// - need a way to identify Actions so I could potentially print out what genes belong to a cell
+// - MAKE A WAY TO VIEW A CELL'S GENOME
+// - MAKE A WAY TO ENGINEER NEW GENES ORGANISMS
+// - maybe don't do a complete shuffle for mutation?
+// - better mutation color change
+// - more variety in the matchers and stuff
+// - make mutation modify existing genes, like just change a matcher or a behavior/direction?
+// - make a geneBuilder so we can have gene pool engineering game!
+// - make a way to get live stats on what genes exist!
+// - allow custom gene pools for a world, that can be modified in real time!e
+// - ok got the stats done, now just need to make the VIEW for them and GRAPHS!!!
+
+
+// -------- D E S I G N   O V E R V I E W -------- //
+
+// I am going to do this in a functional style.
+
+// -------- M O D E L -------- //
+
+// -------- T E S T I N G -------- //
+
+var SPACEBAR = 32;
+
+var WORLD_WIDTH = 200;
+var WORLD_HEIGHT = 80;
+var CELL_GENOME_SIZE = 10;
+var CELL_STARTING_FOOD = 100;
+var MAX_CELL_AGE = 1000;
+var MAX_CELL_FOOD = 150;
+var GENE_POOL_SIZE = 200;
+var GENERATION_LENGTH = 1200;
+var INITIAL_FOOD_SQUARES = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 250);
+var FOOD_SQUARES_PER_TICK = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 300);
+var FOOD_PER_SQUARE = 10;
+var DECOMPOSE_THRESHOLD = 100;
+var STARTING_POPULATION = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 10);
+var STARTING_OBSTACLES = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 300);
+var OBSTACLE_LENGTH = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 100);
+var MUTATION_CHANCE = .10
+
+var CANVAS_WIDTH = WORLD_WIDTH * 5;
+var CANVAS_HEIGHT = WORLD_HEIGHT * 5;
+
+function genGenome(pool, size) {
+	var genome = [];
+	for (var i = 0; i < size; i++) {
+		genome.push(choose(pool));
+	}
+	return genome;
+}
+
+
+function genGenePool(size) {
+	var genePool = [];
+	for (var i = 0; i < size; i++) {
+		genePool.push(genGene());
+	}
+	return genePool;
+}
+
+function genPopulation(pool, size) {
+	var population = []
+	for (var p = 0; p < size; p++) {
+		population.push(new Cell(CELL_STARTING_FOOD, false, genGenome(pool, CELL_GENOME_SIZE), 0, getRandomColor()))
+	}
+	return population;
+}
+
+function nextPopulation(species) {
+
+	var newPop = [];
+
+	species.forEach(function(cell) {
+		newPop.push(cell.newChild(CELL_STARTING_FOOD / 2))
+		newPop.push(cell.newChild(CELL_STARTING_FOOD / 2))
+	})
+
+	return newPop;
+}
+
+
+
+//mutates the given world, initializing it with the starting population and obstacles
+function populateWorld(world, population, genomeSize, foodSquares) {
+	//now spawn obstacles
+	for (var i = 0; i < STARTING_OBSTACLES; i++) {
+		var pos = world.randomPosn();
+		if (world.board[pos.x][pos.y].content) {
+			i--;
+		} else {
+			world.board[pos.x][pos.y].content = new Obstacle()
+			for (var e = 0; e < OBSTACLE_LENGTH; e++) {
+				var adjacents = pos.getAdjacentPosns();
+				var openAdjacents = adjacents.filter(function(posn) {
+					if (world.get(posn) && !world.get(posn).content) {
+						return true
+					}
+					return false;
+				})
+				if (openAdjacents.length == 0) {
+					e = OBSTACLE_LENGTH; //break the loop
+				} else {
+					pos = choose(openAdjacents);
+					world.board[pos.x][pos.y].content = new Obstacle()
+				}
+			}
+		}
+	}
+	//now spawn cells
+	for (var i = 0; i < population.length; i++) {
+		var curCell = population[i];
+		var randomPosn = world.randomPosn();
+		if (world.get(randomPosn).content) {
+			i--;
+		} else {
+			world.spawnCell(randomPosn, curCell);
+		}
+	}
+	//now spawn food
+	for (var i = 0; i < foodSquares; i++) {
+		world.spawnFood(world.randomPosn(), FOOD_PER_SQUARE)
+	}
+}
+
+
+function init(world) {
+	//set up CellBuilder UI here?
+
+	var cellBuilder = new CellBuilder(ACTION_SPEC, MATCHER_SPEC)
+	var genePool = [];
+
+	var actionSelects = document.getElementsByClassName("actionSelect");
+	var matcherSelects = document.getElementsByClassName("matcherSelect");
+
+	var actionKeys = Object.keys(ACTION_SPEC);
+	var matcherKeys = Object.keys(MATCHER_SPEC);
+
+	Array.prototype.forEach.call(actionSelects, function(actionSelect) {
+		actionKeys.forEach(function(actionKey) {
+			var option = document.createElement("option");
+			option.text = actionKey;
+			option.value = actionKey;
+			actionSelect.add(option);
+		})
+	})
+
+	Array.prototype.forEach.call(matcherSelects, function(matcherSelect) {
+		matcherKeys.forEach(function(matcherKey) {
+			var option = document.createElement("option");
+			option.text = matcherKey;
+			option.value = matcherKey;
+			matcherSelect.add(option);
+		})
+	})
+
+	//setting up addGene functionality
+	document.getElementById("addGeneButton").onclick = function() {
+		for (i = 0; i < actionSelects.length; i++) {
+			var actionSelect = actionSelects[i];
+			var direction = parseInt(actionSelect.dataset.direction)
+			var actionName = actionSelect.value;
+			cellBuilder.addBehavior(actionName, direction)
+			//i = actionSelects.length; //break from the for loop, since we can only have 1 action per gene
+		}
+		Array.prototype.forEach.call(matcherSelects, function(matcherSelect) {
+			var direction = parseInt(matcherSelect.dataset.direction)
+			cellBuilder.addMatcher(matcherSelect.value, direction);
+		})
+		cellBuilder.addGene();
+		cellBuilder.clearGeneWorkspace();
+		alert("added the gene")
+	}
+
+	//setting up spawnCell functionality
+	document.getElementById("spawnCellButton").onclick = function() {
+		world.spawnCell(world.randomPosn(), cellBuilder.genCell());
+		//alert("spawned a cell!")
+	}
+
+	//setting up newCell functionality
+	document.getElementById("newCellButton").onclick = function() {
+		cellBuilder.clearEntireWorkspace();
+		alert("cleared workspace!")
+	}
+
+	document.getElementById("genOrgFromGPButton").onclick = function() {
+		var workingGenes = []
+		for (i = 0; i < CELL_GENOME_SIZE; i++) {
+			workingGenes.push(choose(genePool))
+		}
+		var cell = new Cell(CELL_STARTING_FOOD, false, workingGenes, 0, getRandomColor());
+		alert("Rn this does nothing, just is scaffolding for when GeneBuilder is finished and I wire up that stuff...")
+	}
+}
+
+// - ACTUAL FRAMES --------------------------------
+
+function main() {
+	//canvas setup for main simulation
+	canvas = document.createElement("canvas");
+	canvas.width = CANVAS_WIDTH;
+	canvas.height = CANVAS_HEIGHT;
+	ctx = canvas.getContext("2d");
+	document.body.appendChild(canvas);
+	
+	//canvas setup for stats chart
+	var chartCanvas = document.createElement("canvas");
+	//chartCanvas.width = 800;
+	//chartCanvas.height = 800;
+	var chartCtx = chartCanvas.getContext("2d");
+	chartCtx.width = 400;
+	chartCtx.height = 400;
+	document.body.appendChild(chartCanvas)
+
+	//game state stuff
+	var world = new World(emptyBoard(WORLD_WIDTH, WORLD_HEIGHT), 0, {foodSquaresPerTick: FOOD_SQUARES_PER_TICK, foodPerSquare: FOOD_PER_SQUARE, decomposeThreshold: DECOMPOSE_THRESHOLD});
+	//population init stuff
+	var population = genPopulation(genGenePool(GENE_POOL_SIZE), STARTING_POPULATION)
+	populateWorld(world, population, 10, INITIAL_FOOD_SQUARES);
+
+	init(world);
+
+	// ------------------------ C H A R T   S E T U P -------- //
+
+	var getGeneCountsByActionNames = function() {
+		return Object.keys(world.cellStats.geneCountsByAction);
+	}
+
+	var getGeneCountsByAction = function() {
+		return Object.keys(world.cellStats.geneCountsByAction).map(function(key) {
+	    	return world.cellStats.geneCountsByAction[key];
+		})
+	}
+
+	var geneChart = new Chart(chartCtx, {
+	    type: 'pie',
+	    data: {
+	        labels: getGeneCountsByActionNames(),
+	        datasets: [{
+	            label: 'Frequency of Actions in Genes',
+	            data: getGeneCountsByAction(),
+	            backgroundColor: [
+	                'rgba(255, 99, 132, 0.2)',
+	                'rgba(54, 162, 235, 0.2)',
+	                'rgba(255, 206, 86, 0.2)',
+	                'rgba(75, 192, 192, 0.2)',
+	                'rgba(153, 102, 255, 0.2)',
+	                'rgba(255, 159, 64, 0.2)'
+	            ],
+	            borderColor: [
+	                'rgba(255,99,132,1)',
+	                'rgba(54, 162, 235, 1)',
+	                'rgba(255, 206, 86, 1)',
+	                'rgba(75, 192, 192, 1)',
+	                'rgba(153, 102, 255, 1)',
+	                'rgba(255, 159, 64, 1)'
+	            ],
+	            borderWidth: 1
+	        }]
+	    },
+	    options: {
+	    	maintainAspectRatio: false,
+	    	responsive: false,
+	        scales: {
+	            yAxes: [{
+	                ticks: {
+	                    beginAtZero:true
+	                }
+	            }]
+	        }
+	    }
+	});
+
+	//keypress and release handlers
+	keystate = {};
+	document.addEventListener("keydown", function(evt) {
+		keystate[evt.keyCode] = true;
+		if (evt.keyCode == SPACEBAR) {
+			world.togglePause()
+			//
+		}
+	});
+	document.addEventListener("keyup", function(evt) {
+		keystate[evt.keyCode] = false;
+	});
+	
+
+	//main loop
+	var loop = function() {
+		if (!world.paused) {
+			world.tick();
+			world.draw(ctx);
+			//maybe only do this every 100 ticks or so?
+			if (world.tickNum % 100 == 0) {
+				geneChart.data.datasets[0].data = getGeneCountsByAction()
+				geneChart.update()
+			}
+		}
+		window.requestAnimationFrame(loop, canvas);
+	}
+	window.requestAnimationFrame(loop, canvas);
+}
+
+main();
+
+// - SWITCH TO A NORMAL FRAME SYSTEM INSTEAD OF THIS WEIRD PROMISE SHIT
+
+function set() {
+	var foodSquaresPerTick = parseInt(document.getElementById("foodSquaresPerTick").value)
+	alert(foodSquaresPerTick)
+	FOOD_SQUARES_PER_TICK = foodSquaresPerTick;
+}
+
+</script>
+
+</html>
