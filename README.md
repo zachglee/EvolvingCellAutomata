@@ -18,9 +18,42 @@ The design of the model restricts knowledge about the position of objects to the
 
 The World has the grid of `Squares` (in a 2d array) and an `int` tickNum field to track what tick we're on. The `World` measures time in ticks, where each tick is a discrete simulation step. The World has a `tick()` function, and a `draw()` function, which together form the main update/render flow of the program. The main loop in `index.html` calls these two functions every frame.
 
-### The Gene System
+### Gene Overview
 
-This is one of the non-obvious parts of the application. 
+This is one of the more complex parts of the application. I will explain with an example of a gene. Lets say we have a gene, named **RunAway**.
+
+This gene's data is set up to make its cell Move in the Down direction when the following criteria are met:
+* `The Square in the Up direction contains a Cell`
+* `The Square in the Right direction contains Anything (which includes being Empty)`
+* `The Square in the Down direction is Empty`
+* `The Square in the Left direction contains Anything`
+
+These three parts: the `Action` to take, the `Direction` to take it in, and the criteria under which to perform it, are the three parts of the gene. Here they are formalized:
+* `direction`: An integer [0-3], which corresponds to one of the directions [Up=0, Right=1, Down=2, Left=3]. Describes which adjacent `Square` will be the target of the `Action`.
+* `action`: One of several pre-defined functions, which the designer has implemented and made available to the genes. (At the time of this writing, they are Reproduce, Move, Transfer, Dig, Eat) Actions are functions which have the signature: `(cellPosn, targetPosn, world) -> Side Effect of The Action, done by the cell, on the target`
+* `matchers`: A set of 4 `Matchers` which are used to check the 4 adjacent `Squares` for certain criteria. A Matcher is just a function with the signature: `(posn, world, asker) -> Boolean`. They say if a particular thing is true of the given posn in the given world if the asker cell is asking. In our example, the first `Matcher` we had in our set of four returned `true` if the `Square` at the given posn contained a `Cell`. Similar to `Actions`, a set of `Matchers` are implemented by the designer and those are the only ones that can appear in `Genes`.
+
+Together the Action and Direction form a Behavior. (I wrapped those two up in this Behavior type just to make things a bit more modular.)
+
+So our example gene would look like this:
+
+`{
+  name: "RunAway",
+  behavior: {
+             direction: 2, //recall 2 refers to Down
+             action: Move
+            }
+  matchers: [Cell, Any, Empty, Any]
+}`
+
+So what I said about the gene's `Behavior` is true, but it actually will perform its `Behavior` in more than just that case. For example it will also perform its `Behavior` under the following circumstances:
+
+* `The Square in the Up direction contains Anything`
+* `The Square in the Right direction a Cell`
+* `The Square in the Down direction contains Anything`
+* `The Square in the Left direction is Empty`
+
+See the difference? It's the same set of Matchers as before, just rotated 90 degrees clockwise. Any rotation of a set of `Matchers` like this is called an `Isomorphism`. And the rule for when a gene executes its `Behavior` is: when its Matchers OR ANY ISOMORPHISM of its Matchers matches the adjacent squares. In the case that an Isomorphism matched, the `Direction` of the `Behavior` will be rotated accordingly. So in our example here, we would actually Move left if this `Isomorphism` was what matched.
 
 ### A Few Convenience Data Definitions
 * A Direction is a natural number `[0-3]` which represents one of the 4 directions. `[0=up, 1=right, 2=down, 3=left]`
