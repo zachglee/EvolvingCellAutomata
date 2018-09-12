@@ -10,13 +10,13 @@ Organims die when they spend long enough without food. Food is a resource that e
 
 ## Design
 
-The World is the top-level object, which contains the grid of Squares, which can in turn contain Cells or Obstacles. Cells possess Genes. All Genes have Behaviors they can execute under certain circumstances, thereby allowing Cells to interact with the World. Those 'certain circumstances' are determined by the Gene's Matchers, which check if certain things are true about a Cell's environment.
+The `World` is the top-level object, which contains the grid of `Squares`, which can in turn contain `Cells` or `Obstacles`. `Cells` possess `Genes`. All `Genes` have `Behaviors` they can execute under certain circumstances, thereby allowing `Cells` to interact with the `World`. Those 'certain circumstances' are determined by the `Gene`'s `Matchers`, which check if certain things are true about a `Cell`'s environment.
 
-The design of the model restricts knowledge about the position of objects to the top level World layer. (It's the only one that has the grid of Squares) So none of the component objects know anything about their own positions. This decision, while it means I have to pass the World object to any function that wants to modify a position, allows me to have a single point of truth for position. It also allows component objects to exist independent of their position.
+The design of the model restricts knowledge about the position of objects to the top level `World` layer. (It's the only one that has the grid of `Squares`) So none of the component objects know anything about their own positions. This decision, while it means I have to pass the World object to any function that wants to modify a position, allows me to have a single point of truth for position. It also allows component objects to exist independent of their position.
 
 ### World and Main Loop
 
-The World has the grid of Squares (in a 2d array) and a tickNum field to track what tick we're on. The World measures time in ticks, where each tick is a discrete simulation step. The World has a 'tick()' function, and a `draw()` function, which together form the main update/render flow of the program. The main loop in `index.html` calls these two functions every frame.
+The World has the grid of `Squares` (in a 2d array) and an `int` tickNum field to track what tick we're on. The `World` measures time in ticks, where each tick is a discrete simulation step. The World has a `tick()` function, and a `draw()` function, which together form the main update/render flow of the program. The main loop in `index.html` calls these two functions every frame.
 
 ### The Gene System
 
