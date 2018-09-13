@@ -81,7 +81,7 @@ class Cell extends GameObject {
 	}
 
 	//() -> Cell
-	//returns a cell that is a copy of this cell, with the given amount of food (later will add mutation)
+	//returns a cell (with a possibly mutated genome) that is a copy of this cell, with the given amount of food
 	newChild(food) {
 		var isMutant = Math.random() < MUTATION_CHANCE;
 		var newGenes;
@@ -89,9 +89,8 @@ class Cell extends GameObject {
 			newGenes = this.genMutantGenes();
 		} else {
 			newGenes = this.genes.slice(0, this.genes.length);
-			//shuffle(newGenes);
 		}
-		return new Cell(food, this.marked, newGenes, this.birthtick + this.age, getSimilarColor(this.color)/*this.color*/);
+		return new Cell(food, this.marked, newGenes, this.birthtick + this.age, genomeToColor(newGenes));
 	}
 
 	drawAt(posn, world, ctx) {

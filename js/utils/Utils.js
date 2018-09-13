@@ -77,19 +77,16 @@ function getSimilarColor(hexcode) {
 	return hexcode.slice(0, digitIdx) + newLetter + hexcode.slice(digitIdx+1, hexcode.length);
 }
 
-function genomeToColor(genome) {
-	//first get a list of the distribution of action types in the genome (6 moves and 4 reproduces = .6 and .4)
-	actionDistribution = {}
-	Object.keys(ACTION_SPEC).forEach(function(key) {
-		actionDistribution[key] = 0;
+//returns the color of a set of genes by mixing their actions' colors together
+//(Uses this git repo for substractive color mixing: https://github.com/AndreasSoiron/Color_mixer) 
+function genomeToColor(genes) {
+	//for every gene, add its action's color to a list, then mix all those colors together
+	var geneColors = []
+	genes.forEach(function(gene) {
+		var actionName = gene.behavior.actionName;
+		geneColors.push($.Color(ACTION_SPEC[actionName].color))
 	})
-	genome.forEach(function(gene) {
-		actionDistribution[gene.behavior.actionName] += 1;
-	})
-	Object.keys(actionDistribution).forEach(function(key) {
-		actionDistribution[key] /= genome.length;
-	})
-	//
+	return Color_mixer.mix(geneColors).toHexString();
 }
 
 function choose(choices) {

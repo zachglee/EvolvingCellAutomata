@@ -197,10 +197,10 @@ var hibernate = actionFactory(
 
 //This object is the SPOT for what actions are available, as well as their costs, names, and associated colors
 const ACTION_SPEC = {
-	"transfer": {action: transfer, cost: TRANSFER_COST, color: "#10ff00"},
-	"reproduce": {action: reproduce, cost: REPRODUCE_COST, color: "#ffa100"},
+	"transfer": {action: transfer, cost: TRANSFER_COST, color: "#00ff00"},
+	"reproduce": {action: reproduce, cost: REPRODUCE_COST, color: "#fcfcfc"},
 	"move": {action: move, cost: MOVE_COST, color: "#9ec3ff"},
-	"dig": {action: dig, cost: DIG_COST, color: "#7200ff"},
+	"dig": {action: dig, cost: DIG_COST, color: "#812dc6"},
 				      /*, hibernate,*/
-	"eat": {action: eat, cost: EAT_COST, color: "#ff2100"}
+	"eat": {action: eat, cost: EAT_COST, color: "#ff0000"}
 };

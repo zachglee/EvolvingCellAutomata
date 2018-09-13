@@ -63,7 +63,9 @@
 <!-- U T I L S -->
 <script src="js/utils/Utils.js"></script>
 <script src="js/utils/jquery-3.3.1.min.js"></script>
+<script src="js/utils/jquery.color.js"></script>
 <script src="js/utils/chart.bundle.js"></script>
+<script src="js/utils/color_mixer.js"></script>
 
 <!-- M O D E L -->
 <script src="js/model/GameObject.js"></script>
@@ -161,7 +163,8 @@ function genGenePool(size) {
 function genPopulation(pool, size) {
 	var population = []
 	for (var p = 0; p < size; p++) {
-		population.push(new Cell(CELL_STARTING_FOOD, false, genGenome(pool, CELL_GENOME_SIZE), 0, getRandomColor()))
+		var genes = genGenome(pool, CELL_GENOME_SIZE)
+		population.push(new Cell(CELL_STARTING_FOOD, false, genes, 0, genomeToColor(genes)))
 	}
 	return population;
 }
@@ -288,7 +291,7 @@ function init(world) {
 		for (i = 0; i < CELL_GENOME_SIZE; i++) {
 			workingGenes.push(choose(genePool))
 		}
-		var cell = new Cell(CELL_STARTING_FOOD, false, workingGenes, 0, getRandomColor());
+		var cell = new Cell(CELL_STARTING_FOOD, false, workingGenes, 0, genomeToColor(workingGenes));
 		alert("Rn this does nothing, just is scaffolding for when GeneBuilder is finished and I wire up that stuff...")
 	}
 }
