@@ -60,26 +60,26 @@
 
 </body>
 
-<script src="js/jquery-3.3.1.min.js"></script>
-<script src="js/chart.bundle.js"></script>
-
-<!-- -->
-<script src="js/Utils.js"></script>
+<!-- U T I L S -->
+<script src="js/utils/Utils.js"></script>
+<script src="js/utils/jquery-3.3.1.min.js"></script>
+<script src="js/utils/chart.bundle.js"></script>
 
 <!-- M O D E L -->
-<script src="js/GameObject.js"></script>
-<script src="js/Obstacle.js"></script>
-<script src="js/Square.js"></script>
-<script src="js/Behavior.js"></script>
-<script src="js/Gene.js"></script>
-<script src="js/Cell.js"></script>
+<script src="js/model/GameObject.js"></script>
+<script src="js/model/Obstacle.js"></script>
+<script src="js/model/Square.js"></script>
+<script src="js/model/Behavior.js"></script>
+<script src="js/model/Gene.js"></script>
+<script src="js/model/Cell.js"></script>
 <script src="js/CellBuilder.js"></script>
 <script src="js/CellStats.js"></script>
-<script src="js/World.js"></script>
+<script src="js/model/World.js"></script>
 
-<!-- D E F I N I T I O N S -->
-<script src="js/Actions.js"></script>
-<script src="js/EnvMatchers.js"></script>
+<!-- C U S T O M I Z A T I O N -->
+<script src="js/customization/Actions.js"></script>
+<script src="js/customization/EnvMatchers.js"></script>
+<script src="js/customization/WorldParameters.js"></script>
 
 <script src="js/GeneGeneration.js"></script>
 
@@ -124,6 +124,8 @@
 // - allow custom gene pools for a world, that can be modified in real time!e
 // - ok got the stats done, now just need to make the VIEW for them and GRAPHS!!!
 // - define color by makeup of gene types!
+// - decouple World from CellStats() maybe just make the World send out events or something, and cellStats can listen to the events
+// - start abstracting out all the customizable specifics of the World logic so I it can be fully customizable
 
 
 // -------- D E S I G N   O V E R V I E W -------- //
@@ -135,23 +137,6 @@
 // -------- T E S T I N G -------- //
 
 var SPACEBAR = 32;
-
-var WORLD_WIDTH = 200;
-var WORLD_HEIGHT = 80;
-var CELL_GENOME_SIZE = 10;
-var CELL_STARTING_FOOD = 100;
-var MAX_CELL_AGE = 1000;
-var MAX_CELL_FOOD = 150;
-var GENE_POOL_SIZE = 200;
-var GENERATION_LENGTH = 1200;
-var INITIAL_FOOD_SQUARES = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 250);
-var FOOD_SQUARES_PER_TICK = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 300);
-var FOOD_PER_SQUARE = 10;
-var DECOMPOSE_THRESHOLD = 100;
-var STARTING_POPULATION = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 10);
-var STARTING_OBSTACLES = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 300);
-var OBSTACLE_LENGTH = Math.floor((WORLD_WIDTH * WORLD_HEIGHT) / 100);
-var MUTATION_CHANCE = .10
 
 var CANVAS_WIDTH = WORLD_WIDTH * 5;
 var CANVAS_HEIGHT = WORLD_HEIGHT * 5;

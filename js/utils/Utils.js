@@ -77,6 +77,21 @@ function getSimilarColor(hexcode) {
 	return hexcode.slice(0, digitIdx) + newLetter + hexcode.slice(digitIdx+1, hexcode.length);
 }
 
+function genomeToColor(genome) {
+	//first get a list of the distribution of action types in the genome (6 moves and 4 reproduces = .6 and .4)
+	actionDistribution = {}
+	Object.keys(ACTION_SPEC).forEach(function(key) {
+		actionDistribution[key] = 0;
+	})
+	genome.forEach(function(gene) {
+		actionDistribution[gene.behavior.actionName] += 1;
+	})
+	Object.keys(actionDistribution).forEach(function(key) {
+		actionDistribution[key] /= genome.length;
+	})
+	//
+}
+
 function choose(choices) {
 	if (choices.length <= 0) {
 		return console.log("ERROR: You can't choose something from an empty array")

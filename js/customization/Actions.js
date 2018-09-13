@@ -3,14 +3,17 @@
 //An Action is a (CellPosn, TargetPosn, World) -> Side Effect
 //(The given cell does the Action (side effect) targeting the given posn, in the given world)
 
-//A Behavior is a set of 4 actions, each to be performed with an adjacent tile as a target
+//A Behavior is a Action to perform, and a Direction to perform that Action in.
 
-//Although you could define countless different actions, I am only going to have a handful for the purpose of this game.
-//This file is where they will live.
+//This file is where the available Actions are defined. (see ACTION_SPEC at bottom of file)
+//There are countless different actions you could define, and they greatly influence what kinds of
+//organisms evolve.
 
-//you pass in two functions, for behavior in different cases, and it creates an Action,
-//using that behavior, but does the boilerplate for you so you can just focus on the
-//unique behavior of every action
+//The Action Factory abstracts out some of the boilerplate all actions will have
+//(like case analysis based on if the target is a Cell, Square, or Obstacle
+// and some convenience logic, like resolving the the actor and target from their Posns)
+//You pass in three functions, for behavior in different cases, and it creates an Action,
+//using that behavior.
 var actionFactory = function(cellCase, squareCase, obstacleCase) {
 	return function(cellPosn, targetPosn, world) {
 		//resolve the cell and target squares from the given posns, do validity checking for edge cases
@@ -73,6 +76,7 @@ var transfer = actionFactory(
 	}
 )
 
+//creates a child of the actor on an empty square
 var reproduce = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
@@ -99,27 +103,11 @@ var reproduce = actionFactory(
 	},
 )
 
+//moves the actor to an adjacent empty square, picking up some food from that square
 var move = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
-		if (target.food < 0) { //if the cell is a corpse
-			/*world.get(targetPosn).content = cell; //move onto the square, eating the cell's body
-			world.get(cellPosn).content = null;
-			cell.food += BODY_COST;
-			if (cell.age > 3) { //this is to extend lifetime if you eat other cells
-				cell.age -= 2;
-			}*/
-		} else {
-			if  (target.food <= cell.food) {
-				//cell.food += (target.food + BODY_COST);
-				//world.get(targetPosn).content = cell;
-				//world.get(cellPosn).content = null;
-
-				/*target.food -= 2;
-				cell.food += 2;*/
-			}
-			//lets see how this goes
-		}
+		//do nothing
 	},
 	//target = Square
 	function(cell, cellPosn, target, targetPosn, world) {
@@ -141,6 +129,7 @@ var move = actionFactory(
 	}
 )
 
+//actor steals some food from another cell, consuming it completely if it has below a certain food threshold
 var eat = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
@@ -173,6 +162,7 @@ var eat = actionFactory(
 	}
 )
 
+//the actor destroys and moves onto an adjecenet Obstacle
 var dig = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
@@ -205,11 +195,12 @@ var hibernate = actionFactory(
 	}, HIBERNATE_COST
 )
 
+//This object is the SPOT for what actions are available, as well as their costs, names, and associated colors
 const ACTION_SPEC = {
-	"transfer": {action: transfer, cost: TRANSFER_COST},
-	"reproduce": {action: reproduce, cost: REPRODUCE_COST},
-	"move": {action: move, cost: MOVE_COST},
-	"dig": {action: dig, cost: DIG_COST},
+	"transfer": {action: transfer, cost: TRANSFER_COST, color: "#10ff00"},
+	"reproduce": {action: reproduce, cost: REPRODUCE_COST, color: "#ffa100"},
+	"move": {action: move, cost: MOVE_COST, color: "#9ec3ff"},
+	"dig": {action: dig, cost: DIG_COST, color: "#7200ff"},
 				      /*, hibernate,*/
-	"eat": {action: eat, cost: EAT_COST}
+	"eat": {action: eat, cost: EAT_COST, color: "#ff2100"}
 };
