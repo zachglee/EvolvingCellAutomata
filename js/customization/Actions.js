@@ -36,7 +36,7 @@ var actionFactory = function(cellCase, squareCase, obstacleCase) {
 }
 
 //constant action costs
-const TRANSFER_COST = 1;
+const TRANSFER_COST = 2;
 const REPRODUCE_COST = 60;
 const MOVE_COST = 2;
 const EAT_COST = 2;
@@ -45,7 +45,7 @@ const HIBERNATE_COST = 0;
 
 const ABSORB_AMOUNT = 10;
 const BODY_COST = REPRODUCE_COST / 10;
-const TRANSFER_AMOUNT = 5.0;
+const TRANSFER_AMOUNT = 6.0;
 
 var nothing = function(cellPosn, targetPosn, world) {
 	return;
@@ -54,7 +54,7 @@ var nothing = function(cellPosn, targetPosn, world) {
 var transfer = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
-		target.food += TRANSFER_AMOUNT / 2;
+		target.food += TRANSFER_AMOUNT / 1.5;
 		/*var openAdjacents = cellPosn.getAdjacentPosns().filter(function(posn) {
 			return !!world.get(posn);
 		})
@@ -197,10 +197,10 @@ var hibernate = actionFactory(
 
 //This object is the SPOT for what actions are available, as well as their costs, names, and associated colors
 const ACTION_SPEC = {
-	"transfer": {action: transfer, cost: TRANSFER_COST, color: "#00ff00"},
-	"reproduce": {action: reproduce, cost: REPRODUCE_COST, color: "#fcfcfc"},
-	"move": {action: move, cost: MOVE_COST, color: "#9ec3ff"},
-	"dig": {action: dig, cost: DIG_COST, color: "#812dc6"},
+	"transfer": {action: transfer, cost: TRANSFER_COST, color: "#00ff00"}, //green
+	"reproduce": {action: reproduce, cost: REPRODUCE_COST, color: "#fcfcfc"}, //white
+	"move": {action: move, cost: MOVE_COST, color: "#004cff"}, //blue
+	"dig": {action: dig, cost: DIG_COST, color: "#ffae00"}, //orange
 				      /*, hibernate,*/
-	"eat": {action: eat, cost: EAT_COST, color: "#ff0000"}
+	"eat": {action: eat, cost: EAT_COST, color: "#ff0000"} //red
 };
