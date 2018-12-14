@@ -38,6 +38,7 @@ function squareHeight(world) {
 	ctx.stroke();
 }*/
 
+//returns
 function emptyBoard(width, height) {
 	return new Array(width).fill(null).map(function() {
 		return new Array(height).fill(null).map(function(square) {
@@ -89,6 +90,7 @@ function genomeToColor(genes) {
 	return Color_mixer.mix(geneColors).toHexString();
 }
 
+//return a random one of the things in the choices array. (by reference, not a copy)
 function choose(choices) {
 	if (choices.length <= 0) {
 		return console.log("ERROR: You can't choose something from an empty array")

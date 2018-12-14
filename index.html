@@ -79,8 +79,8 @@
 <script src="js/model/World.js"></script>
 
 <!-- C U S T O M I Z A T I O N -->
-<script src="js/customization/Actions.js"></script>
 <script src="js/customization/EnvMatchers.js"></script>
+<script src="js/customization/Actions.js"></script>
 <script src="js/customization/WorldParameters.js"></script>
 
 <script src="js/GeneGeneration.js"></script>
@@ -92,7 +92,6 @@
 // - Make sexual reproduction
 // - Decouple drawing logic from the individual files... Orrr maybe not
 // - make chromosome system
-// - make colors be unique identification
 // - optimize so it's not slow
 // - make customizable
 // - optimize and cleanup this mess
@@ -129,6 +128,13 @@
 // - decouple World from CellStats() maybe just make the World send out events or something, and cellStats can listen to the events
 // - start abstracting out all the customizable specifics of the World logic so I it can be fully customizable
 // - make chart colors line up with actual action colors
+// - make an action that puts down obstacles!
+// - make actions which only work on one type of square not get generated attacking a dumb square -- like dig should never act on an empty square
+// - mess with frequencies of the starting gene pool so that we get less dud runs
+// - can you store food inside obstacles? That could be interesting
+// - more intelligent initial org generation: everyone should have at least 1 reproduce gene
+// - OOHHHH TRY AND IMPLEMENT WRAPAROUND!!!
+// - would be nice if every action had some side effects that change the environment, not just death
 
 
 // -------- D E S I G N   O V E R V I E W -------- //
@@ -141,12 +147,18 @@
 
 var SPACEBAR = 32;
 
-var CANVAS_WIDTH = WORLD_WIDTH * 5;
-var CANVAS_HEIGHT = WORLD_HEIGHT * 5;
+var CANVAS_WIDTH = WORLD_WIDTH * CELL_WIDTH;
+var CANVAS_HEIGHT = WORLD_HEIGHT * CELL_HEIGHT;
 
+//randomly generates a set of size genes from the given gene pool
+//will guarantee that at least 1 of them is a reproduction gene
 function genGenome(pool, size) {
 	var genome = [];
-	for (var i = 0; i < size; i++) {
+	var reproductionGenes = pool.filter(function(gene) {
+		return gene.behavior.action == reproduce;
+	})
+	genome.push(choose(reproductionGenes));
+	for (var i = 1; i < size; i++) {
 		genome.push(choose(pool));
 	}
 	return genome;

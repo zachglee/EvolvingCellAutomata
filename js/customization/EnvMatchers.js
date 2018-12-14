@@ -54,6 +54,8 @@ const MATCHER_SPEC = {
 	"obstacle": obstacle,
 	//"cell": cell,
 	"food": food,
+	/*"cell": cell,*/
+	"fat": fat,
 	"selfCell": selfCell,
 	"foreignCell": foreignCell/*, fat*/
 }

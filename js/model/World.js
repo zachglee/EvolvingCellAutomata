@@ -15,22 +15,66 @@ class World {
 		this.cellStats = new CellStats();
 	}
 
-	//TODO make this less terribly inefficient
+	//returns a random posn within the bounds of this World
 	randomPosn() {
 		var p = new Posn(Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height));
-		while (!this.get(p) || (this.get(p).content && this.get(p).content.isObstacle)) {
-			p = new Posn(Math.floor(Math.random() * this.width), Math.floor(Math.random() * this.height));
-		}
 		return p;
 	}
 
-	//gets a random square that does NOT have an obstacle on it
+	//gets a random square TODO: let this one take a predicate to filter by?
 	randomSquare() {
 		return this.get(this.randomPosn());
 	}
 
+	//returns the list of existing posns adjacent to the given posn, in this world (no out of bounds posns)
+	getExistingAdjacentPosns(posn) {
+		var theWorld = this;
+		return posn.getAdjacentPosns().filter(function(p) {
+			return !!theWorld.get(p);
+		})
+	}
+
+	//returns the position of the closest open (aka non-obstacle) square to the square at the given posn
+	//(if the square at the given posn is open, returns the given posn)
+	//TODO UNTESTED ITS BROKEN BROKEN BROKEN
+	//TODO make this code less inefficient for god's sake
+	closestOpenPosn(posn) {
+		//bfs starting from posn
+		var searchQueue = [posn];
+		var blacklist = [];
+		while (searchQueue.length > 0) {
+			var searching = searchQueue.pop();
+			var searchingSquare = this.get(searching);
+			//is it a posn we're looking for?
+			if (searchingSquare && (!searchingSquare.content || !searchingSquare.content.isObstacle)) {
+				return searching; //we found what we're looking for!
+			}
+			//otherwise, add the current posn to blacklist and keep searching
+			blacklist.push(searching);
+			var adjacents = shuffle(this.getExistingAdjacentPosns(searching));
+			adjacents.forEach(function(p) { //add every posn in adjacents to the searchQueue
+				var posnEqualToCurPos = function(otherPos) {
+					return otherPos.x == p.x && otherPos.y == p.y;
+				}
+				//but only if it's not been blacklisted!
+				if (blacklist.filter(posnEqualToCurPos).length == 0) {
+					searchQueue.unshift(p);
+				}
+			})
+		}
+	}
+
+	//gets a random square which passes the given predicate
+	/*randomSquareWhichPassesPredicate(pred) {
+
+	}*/
+
+	//adds the given amount of food to the square at the given posn.
+	//if the square has an obstacle on it, the food will 'roll off'
+	//and be placed on the closest square (manhattan distance) which
+	//does NOT have an obstacle on it
 	spawnFood(posn, amount) {
-		var targetSquare = this.get(posn)
+		var targetSquare = this.get(this.closestOpenPosn(posn))
 		if (targetSquare.content && targetSquare.content.isCell) {
 			targetSquare.content.food += amount / 1;
 		} else {

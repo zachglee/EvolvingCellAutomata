@@ -1,5 +1,7 @@
 //This is where the code to generate genes lives
 
+const GENE_REROLL_VALID_TARGETS_CHANCE = .5;
+
 var genesGenerated = 0;
 
 //To gen Behavior:
@@ -8,7 +10,7 @@ var genesGenerated = 0;
 function genBehavior() {
 	var actionName = choose(Object.keys(ACTION_SPEC));
 	var actioncost = ACTION_SPEC[actionName]; //choose a random action
-	var action = actioncost.action;
+	var action = actioncost.action; //the action function
 	var cost = actioncost.cost;
 	var direction = Math.floor(Math.random() * 3);
 	return new Behavior(direction, cost, action, actionName)
@@ -33,5 +35,20 @@ function genAdjacencyEnv() {
 
 function genGene() {
 	genesGenerated += 1;
-	return new Gene(genAdjacencyEnv(), genBehavior(), "randomGene" + genesGenerated);
+	newGene = new Gene(genAdjacencyEnv(), genBehavior(), "randomGene" + genesGenerated);
+	var targetMatchers = ACTION_SPEC[newGene.behavior.actionName].targetMatchers;
+	var matcherInBehaviorDirection = newGene.matchers[newGene.behavior.direction];
+	//check the targetMatchers of the action (based on the ACTION_SPEC) and only generate the gene if the action in the direction
+	//of the behavior is in targetMatchers (or is any). Otherwise, re-generate the gene randomly until we get a valid one
+	while (!targetMatchers.includes(matcherInBehaviorDirection) && matcherInBehaviorDirection != any) {
+		var rand = Math.random();
+		if (rand <= GENE_REROLL_VALID_TARGETS_CHANCE) {
+			targetMatchers = ACTION_SPEC[newGene.behavior.actionName].targetMatchers;
+			matcherInBehaviorDirection = newGene.matchers[newGene.behavior.direction];
+			newGene = new Gene(genAdjacencyEnv(), genBehavior(), "randomGene" + genesGenerated);
+		} else {
+			return newGene;
+		}
+	}
+	return newGene;
 }

@@ -40,12 +40,13 @@ const TRANSFER_COST = 2;
 const REPRODUCE_COST = 60;
 const MOVE_COST = 2;
 const EAT_COST = 2;
-const DIG_COST = 2;
+const DIG_COST = 8;
+const BLOCK_COST = 3;
 const HIBERNATE_COST = 0;
 
 const ABSORB_AMOUNT = 10;
 const BODY_COST = REPRODUCE_COST / 10;
-const TRANSFER_AMOUNT = 6.0;
+const TRANSFER_AMOUNT = 5.0;
 
 var nothing = function(cellPosn, targetPosn, world) {
 	return;
@@ -54,7 +55,7 @@ var nothing = function(cellPosn, targetPosn, world) {
 var transfer = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
-		target.food += TRANSFER_AMOUNT / 1.5;
+		target.food += TRANSFER_AMOUNT;
 		/*var openAdjacents = cellPosn.getAdjacentPosns().filter(function(posn) {
 			return !!world.get(posn);
 		})
@@ -62,7 +63,7 @@ var transfer = actionFactory(
 	},
 	//target = Square
 	function(cell, cellPosn, target, targetPosn, world) {
-		target.food += TRANSFER_AMOUNT;
+		target.food += TRANSFER_COST;
 		/*var openAdjacents = cellPosn.getAdjacentPosns().filter(function(posn) {
 			return !!world.get(posn);
 		})
@@ -72,7 +73,7 @@ var transfer = actionFactory(
 	},
 	//target = Obstacle
 	function(cell, cellPosn, traget, targetPosn, world) {
-		//do nothing
+		cell.food += TRANSFER_COST; //REFUNDING
 	}
 )
 
@@ -107,7 +108,7 @@ var reproduce = actionFactory(
 var move = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
-		//do nothing
+		cell.food += MOVE_COST; //REFUND
 	},
 	//target = Square
 	function(cell, cellPosn, target, targetPosn, world) {
@@ -125,7 +126,22 @@ var move = actionFactory(
 	},
 	//target = Obstacle
 	function(cell, cellPosn, traget, targetPosn, world) {
-		//do nothing
+		cell.food += MOVE_COST; //REFUND
+	}
+)
+
+var block = actionFactory(
+	//target = Cell
+	function(cell, cellPosn, target, targetPosn, world) {
+		cell.food += MOVE_COST; //REFUND
+	},
+	//target = Square
+	function(cell, cellPosn, target, targetPosn, world) {
+		target.content = new Obstacle();
+	},
+	//target = Obstacle
+	function(cell, cellPosn, traget, targetPosn, world) {
+		cell.food += MOVE_COST; //REFUND
 	}
 )
 
@@ -158,7 +174,7 @@ var eat = actionFactory(
 	},
 	//target = Obstacle
 	function(cell, cellPosn, traget, targetPosn, world) {
-		cell.food += EAT_COST;
+		cell.food += EAT_COST; //refund
 	}
 )
 
@@ -197,10 +213,11 @@ var hibernate = actionFactory(
 
 //This object is the SPOT for what actions are available, as well as their costs, names, and associated colors
 const ACTION_SPEC = {
-	"transfer": {action: transfer, cost: TRANSFER_COST, color: "#00ff00"}, //green
-	"reproduce": {action: reproduce, cost: REPRODUCE_COST, color: "#fcfcfc"}, //white
-	"move": {action: move, cost: MOVE_COST, color: "#004cff"}, //blue
-	"dig": {action: dig, cost: DIG_COST, color: "#ffae00"}, //orange
+	"transfer": {action: transfer, cost: TRANSFER_COST, targetMatchers: [cell, empty], color: "#00ff00"}, //green
+	"reproduce": {action: reproduce, cost: REPRODUCE_COST, targetMatchers: [empty], color: "#fcfcfc"}, //white
+	"move": {action: move, cost: MOVE_COST, targetMatchers: [empty], color: "#004cff"}, //blue
+	"dig": {action: dig, cost: DIG_COST, targetMatchers: [obstacle], color: "#ffae00"}, //orange
+	//"block": {action: block, cost: BLOCK_COST, targetMatchers: [empty], color: "#ffff00"}, //yellow
 				      /*, hibernate,*/
-	"eat": {action: eat, cost: EAT_COST, color: "#ff0000"} //red
+	"eat": {action: eat, cost: EAT_COST, targetMatchers: [selfCell, foreignCell], color: "#ff0000"} //red
 };

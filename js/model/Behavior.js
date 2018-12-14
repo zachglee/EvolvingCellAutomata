@@ -8,10 +8,10 @@
 
 class Behavior {
 	constructor(direction, cost, action, actionName) {
-		this.direction = direction;
-		this.cost = cost;
-		this.action = action;
-		this.actionName = actionName
+		this.direction = direction; //the 'direction' to perform the action in
+		this.cost = cost; //food cost to perform this behavior
+		this.action = action; //actual action function that mutates the world
+		this.actionName = actionName; //name of action (to lookup in ACTION_SPEC)
 	}
 
 	// execute this behavior's action with the given cell as the actor, acting from the given posn, with the given isomorphism
