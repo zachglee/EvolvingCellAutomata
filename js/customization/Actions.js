@@ -40,7 +40,7 @@ const TRANSFER_COST = 2;
 const REPRODUCE_COST = 60;
 const MOVE_COST = 2;
 const EAT_COST = 2;
-const DIG_COST = 8;
+const DIG_COST = 6;
 const BLOCK_COST = 3;
 const HIBERNATE_COST = 0;
 
