@@ -29,15 +29,13 @@ class World {
 	//returns the list of existing posns adjacent to the given posn, in this world (no out of bounds posns)
 	getExistingAdjacentPosns(posn) {
 		var theWorld = this;
-		return posn.getAdjacentPosns().filter(function(p) {
+		return posn.getAdjacentPosnsWithWraparound(theWorld).filter(function(p) {
 			return !!theWorld.get(p);
 		})
 	}
 
 	//returns the position of the closest open (aka non-obstacle) square to the square at the given posn
 	//(if the square at the given posn is open, returns the given posn)
-	//TODO UNTESTED ITS BROKEN BROKEN BROKEN
-	//TODO make this code less inefficient for god's sake
 	closestOpenPosn(posn) {
 		//bfs starting from posn
 		var searchQueue = [posn];

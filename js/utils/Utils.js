@@ -1,13 +1,13 @@
 // -------- U T I L S -------- //
 
 //A Posn is an (x, y) coordinate
-class Posn {
+/*class Posn {
 	constructor(x, y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	//returns a list of the posns adjacent to this,
+	//returns a list of the posns adjacent to this, in a purely mathematical sense. there is no guarantee these posns actually exist in a given world
 	//[top, right, bottom, left]
 	getAdjacentPosns() {
 		return [new Posn(this.x, this.y + 1), new Posn(this.x + 1, this.y), new Posn(this.x, this.y - 1), new Posn(this.x - 1, this.y)];
@@ -17,7 +17,7 @@ class Posn {
 	toCanvasPosn(world) {
 		return new Posn(this.x * squareWidth(world), (world.height - (this.y + 1)) * squareHeight(world))
 	}
-}
+}*/
 
 // -------- C O N S T A N T S -------- //
 

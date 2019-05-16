@@ -28,7 +28,7 @@ class Gene {
 	//(asker is a Cell)
 	findMatchingIsomorphism(posn, world, asker) {
 		//grab the adjacent squares by posn, put them in a 4 element array
-		var adjacentPosns = posn.getAdjacentPosns()
+		var adjacentPosns = posn.getAdjacentPosnsWithWraparound(world)
 		//try each of the 4 isomorphisms:
 		for (var isomorphism = 0; isomorphism < 4; isomorphism++) {
 			var isMatch = true;
@@ -44,16 +44,6 @@ class Gene {
 		}
 		return -1;
 	}
-
-	/*executeBehavior(cell, posn, world, isomorphism) {
-		var adjacentPosns = posn.getAdjacentPosns();
-		//execute every action in the behavior, accounting for the isomorphism
-		for (var i = 0; i < 4; i++) {
-			this.behavior[(i + isomorphism) % 4](posn, adjacentPosns[i], world);
-		}
-	}*/
-
-	//TODO REMOVE THIS ^^
 
 	//checks if this gene should act on the given cell at the given posn in the given world,
 	//and if it should, makes it act by executing its behavior, and returns true.

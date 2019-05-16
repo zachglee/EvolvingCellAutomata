@@ -16,7 +16,7 @@ class Behavior {
 
 	// execute this behavior's action with the given cell as the actor, acting from the given posn, with the given isomorphism
 	execute(cell, posn, world, isomorphism) {
-		var adjacentPosns = posn.getAdjacentPosns(); //posns adjacent to the cell
+		var adjacentPosns = posn.getAdjacentPosnsWithWraparound(world); //posns adjacent to the cell
 		this.action(posn, adjacentPosns[(this.direction + 3*isomorphism) % 4], world);
 		//^^ 3*isomorphism is rotating counterclockwise in mod 4, aka -1 for isomorphism 1, -2 for isomorphism 2, etc.
 		cell.food -= this.cost;

@@ -17,17 +17,16 @@ class Cell extends GameObject {
 		this.startTickingFromGene = 0; //maybe obsolete?
 		this.decay = 0; //how long the cell has spent with food < 0
 		this.maxFood = MAX_CELL_FOOD;
+		//drawing data
+		this.showEaten = 0;
 	}
-
-
 
 	//performs the side effects that should occur this tick,
 	//given this cell at the given posn, in the given world
 	tick(posn, world) {
 		if (this.age > 0) { //as long as this cell wasn't born this tick:
-			if (this.food > -1) { //if this cell is not dead:
+			if (this.food >= 0) { //if this cell is not dead:
 				this.food -= 1; //cells must spend 1 food per tick to survive
-				//this.decay = 0;
 			} else {
 				this.decay += 1;
 			}
@@ -38,26 +37,50 @@ class Cell extends GameObject {
 					this.startTickingFromGene = i;
 					return;
 				}
-				//tick genes until we find one that performs its behavior. Stop once we do that one
-				/*if (this.genes[i].tick(this, posn, world)) {
-					//this.startTickingFromGene += 1; //or I make it jump to the last gene ticked
-					this.startTickingFromGene = i+1;
-					return;
-				}*/
 			}
-			//if we get through all the genes, without finding one that works, delete the first gene. If we run out of genes, reset the gene deck
+			//if we get through all the genes, without finding one that works, delete the first gene. Or if we run out of genes, reset the gene deck
 			if (this.geneDeck.length == 0) {
 				this.geneDeck = this.genes.slice(0, this.genes.length)
 				this.startTickingFromGene = 0;
 			} else {
 				this.geneDeck.splice(0, 1)
-				this.food += .8;
+				var inactivityRefundAfterAgePenalty = INACTIVITY_REFUND * (1 - (.0002 * this.age))
+				this.food += inactivityRefundAfterAgePenalty;
 			}
+			//now if this cell has more food than neighbor cells, transfer some food to them (as if by diffusion through a cell-membrane)
+			this.diffuseFood(posn, world);
 		}
 		if (this.food > this.maxFood) {
 			this.food = this.maxFood;
 		}
 		this.age += 1;
+	}
+
+	//transfer any food to neighbor cells if necessary, given that this cell is at the given posn in the given world
+	diffuseFood(posn, world) {
+		var thisCell = this;
+		var adjacents = posn.getAdjacentPosnsWithWraparound(world);
+		var neighborCells = adjacents.map(function(posn) {
+			var square = world.get(posn);
+			if (square && square.content && square.content.isCell) {
+				return square.content;
+			} else {
+				return null;
+			}
+		}).filter(function(cellOrNull) {
+			return !!cellOrNull && cellOrNull.food > 0;
+		})
+		shuffle(neighborCells); //randomize the order
+		neighborCells.forEach(function(cell) {
+			var foodProportion = thisCell.food / cell.food; //proportion of this cell's food to the neighbor cell's food
+			if (foodProportion > 1) {
+				//basically just map every value of foodProportion in range (1,3] to a scaling factor between (0, 1]
+				//that's how much we'll scale the max food diffusion rate by
+				var foodToTransfer = MAX_FOOD_DIFFUSION_RATE * (Math.min((foodProportion-1) / 2, 1));
+				cell.food += Math.min(foodToTransfer, thisCell.food);
+				thisCell.food -= Math.min(foodToTransfer, thisCell.food);
+			}
+		})
 	}
 
 	genMutantGenes() {
@@ -97,5 +120,10 @@ class Cell extends GameObject {
 		var canvasPosn = posn.toCanvasPosn(world);
 		ctx.fillStyle = this.color;
 		ctx.fillRect(canvasPosn.x, canvasPosn.y, squareWidth(world), squareHeight(world));
+		if (this.showEaten && this.showEaten > 0) {
+			ctx.fillStyle = "#000000";
+			ctx.fillRect(canvasPosn.x + CELL_WIDTH/2 - 1, canvasPosn.y + CELL_HEIGHT/2 - 1, 2, 2);
+			this.showEaten -= 1;
+		}
 	}
 }

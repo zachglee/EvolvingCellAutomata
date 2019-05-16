@@ -68,6 +68,7 @@
 <script src="js/utils/color_mixer.js"></script>
 
 <!-- M O D E L -->
+<script src="js/model/Posn.js"></script>
 <script src="js/model/GameObject.js"></script>
 <script src="js/model/Obstacle.js"></script>
 <script src="js/model/Square.js"></script>
@@ -92,44 +93,33 @@
 // - Make sexual reproduction
 // - Decouple drawing logic from the individual files... Orrr maybe not
 // - make chromosome system
-// - optimize so it's not slow
 // - make customizable
 // - optimize and cleanup this mess
-// - i need specializations like x action is really cheap for you, etc
-// - Properties, like being good at eating food or photosynthesis / bad at other stuff, maybe based on genes
-// - terrain differences, benefits/advantages for being next to/away from walls
+// - terrain differences?
 // - clean up all the misc stuff and rules i have
 // - irregular food sources
 // - have a behavior that lasts multiple ticks -- like first you do x, then you do y, then you do z, so action list can be over multiple ticks?
-// - implement screen wraparound
 // - variable food function
 // - irreversible changes to terrain, like how much movement costs
 // - again no one guy should be able to use up all the resources
 // - reproduce at food cap
 // - make graphs once we're in a good place
-// - figure out what to do about dud target cases for actions
-// - maybe I need to artificially limit what actions each species can take
 // - ahh what if its easy to mutate and get dif env-matchers of your stuff, but really hard to mutate and get a different action? Right now there's no commitment to specialization
-// - food landing on obstacles rolls off?
 // - need a way to encourage the predator prey competition pressure
 // - address the tendency to always go right
 // - need a way to identify Actions so I could potentially print out what genes belong to a cell
 // - MAKE A WAY TO VIEW A CELL'S GENOME
 // - MAKE A WAY TO ENGINEER NEW GENES ORGANISMS
 // - maybe don't do a complete shuffle for mutation?
-// - better mutation color change
 // - more variety in the matchers and stuff
 // - make mutation modify existing genes, like just change a matcher or a behavior/direction?
 // - make a geneBuilder so we can have gene pool engineering game!
 // - make a way to get live stats on what genes exist!
 // - allow custom gene pools for a world, that can be modified in real time!e
-// - ok got the stats done, now just need to make the VIEW for them and GRAPHS!!!
-// - define color by makeup of gene types!
 // - decouple World from CellStats() maybe just make the World send out events or something, and cellStats can listen to the events
 // - start abstracting out all the customizable specifics of the World logic so I it can be fully customizable
 // - make chart colors line up with actual action colors
 // - make an action that puts down obstacles!
-// - make actions which only work on one type of square not get generated attacking a dumb square -- like dig should never act on an empty square
 // - mess with frequencies of the starting gene pool so that we get less dud runs
 // - can you store food inside obstacles? That could be interesting
 // - more intelligent initial org generation: everyone should have at least 1 reproduce gene
@@ -138,6 +128,22 @@
 // - one frame flash to mark food falling
 // - pause mode where you can scroll and zoom and hover mouse for info about org
 // - have some obstacles be permanent
+// - need emergent benefit of being close together, not an explicit one with Transfer.
+// - what if it was a lot harder to mutate your actions, so you had to just mutate the order and env-matching of your shit to maximize survival potential?
+// - bring back variable genome size?
+// - make obstacle generation not walk itself into a corner as easy
+// - food sharing properties when orgs are close together? Leeching/eating can emerge from this. (remove transfer if i do this)
+// - allow orgs to evolve as FSMs rather than gene decks? Input tape is the environment + their food level? Transitions are actions: see this environment -> do this. each state has its own gene-set, then we just associate genes with transitioning to a particular state.
+// - ok so a more fundamental problem is maybe that the most efficient strategy really is just what has evolved. Like can I even think of a better more consistent one? Probably not. I need to actually create an environment where there can be more varied efficient strategies. FSM might help a bit by allowing more intelligent behavior, which could be gotten to by pressure from competitionn
+// - there should be no perfect undos -- so digging shouldnt be able to perfectly undo cell death
+
+// - new data type : GeneTransition? Combo of gene and pointer to new state
+// - State is an array of GeneTransition
+// - make cells have states, and implement transitioning, but make them all transation to the single state (for now leave gene deck behavior)
+// - have a stateIndex, which is the index of the State that the cell is currently in.
+// - make the cell code only use the current state as the GeneDeck
+// - reduce genome size to 6 (6 per state) or maybe 5?
+// - then we need different mutation types -- shuffle, just a transition pointer mutation, and then a full gene mutation
 
 
 // -------- D E S I G N   O V E R V I E W -------- //
@@ -148,7 +154,7 @@
 
 // -------- T E S T I N G -------- //
 
-var SPACEBAR = 32;
+var SPACEBAR = 32; //keycode
 
 var CANVAS_WIDTH = WORLD_WIDTH * CELL_WIDTH;
 var CANVAS_HEIGHT = WORLD_HEIGHT * CELL_HEIGHT;
@@ -209,7 +215,7 @@ function populateWorld(world, population, genomeSize, foodSquares) {
 		} else {
 			world.board[pos.x][pos.y].content = new Obstacle()
 			for (var e = 0; e < OBSTACLE_LENGTH; e++) {
-				var adjacents = pos.getAdjacentPosns();
+				var adjacents = pos.getAdjacentPosnsWithWraparound(world);
 				var openAdjacents = adjacents.filter(function(posn) {
 					if (world.get(posn) && !world.get(posn).content) {
 						return true
@@ -220,7 +226,10 @@ function populateWorld(world, population, genomeSize, foodSquares) {
 					e = OBSTACLE_LENGTH; //break the loop
 				} else {
 					pos = choose(openAdjacents);
-					world.board[pos.x][pos.y].content = new Obstacle()
+					//TODO actually do this nicely designed, have a different type of obstacle that cells wont waste energy trying to dig through
+					var unbreakableObstacle = new Obstacle();
+					unbreakableObstacle.unbreakable = true;
+					world.board[pos.x][pos.y].content = unbreakableObstacle;
 				}
 			}
 		}
