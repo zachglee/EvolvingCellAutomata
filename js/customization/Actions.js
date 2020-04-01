@@ -42,8 +42,9 @@ const MOVE_COST = 1;
 const EAT_COST = 1;
 const DIG_COST = 3;
 const BLOCK_COST = 3;
+const HIBERNATE_COST = 0;
 
-const ABSORB_AMOUNT = 10;
+const ABSORB_AMOUNT = 30;
 const BODY_COST = REPRODUCE_COST / 10;
 const TRANSFER_AMOUNT = 1.5;
 
@@ -155,8 +156,8 @@ var eat = actionFactory(
 			world.get(cellPosn).content = null; // we move onto the cell we eat if it's a corpse
 			//world.get(targetPosn).content = null;
 		} else {
-			target.food -= (ABSORB_AMOUNT / 1);
-			cell.food += (ABSORB_AMOUNT / 1);
+			target.food -= (ABSORB_AMOUNT * .75);
+			cell.food += (ABSORB_AMOUNT * .75);
 			if (target.showEaten) {
 				target.showEaten += 5;
 			} else {
@@ -196,7 +197,7 @@ var dig = actionFactory(
 	},
 	//target = Obstacle
 	function(cell, cellPosn, target, targetPosn, world) {
-		//cell.food += BODY_COST / 2;
+		cell.food += BODY_COST * .75;
 		if (!target.unbreakable) {
 			world.get(targetPosn).content = cell;
 			world.get(cellPosn).content = null;
@@ -206,23 +207,31 @@ var dig = actionFactory(
 	}
 )
 
-/*var hibernate = actionFactory(
+var hibernate = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
-		cell.food += .9;
+		cell.food += .95;
 		//cell.age -= .9;
-	}, HIBERNATE_COST,
+	},
+	//target = Square
 	function(cell, cellPosn, target, targetPosn, world) {
 		//nothing
 		cell.food += .95
 		//cell.age -= .9
-	}, HIBERNATE_COST
-)*/
+	},
+	//target = Obstacle
+	function(cell, cellPosn, target, targetPosn, world) {
+		//nothing
+		cell.food += .95
+		//cell.age -= .9
+	}
+)
 //TODO REMOVE ^^
 
 //This object is the SPOT for what actions are available, as well as their costs, names, and associated colors
 const ACTION_SPEC = {
 	//"transfer": {action: transfer, cost: TRANSFER_COST, targetMatchers: [cell, empty], color: "#00ff00"}, //green
+	"hibernate": {action: hibernate, cost: HIBERNATE_COST, targetMatchers: [cell, empty, any, obstacle], color: "#00ff00"}, //green
 	"reproduce": {action: reproduce, cost: REPRODUCE_COST, targetMatchers: [empty], color: "#fcfcfc"}, //white
 	"move": {action: move, cost: MOVE_COST, targetMatchers: [empty], color: "#004cff"}, //blue
 	"dig": {action: dig, cost: DIG_COST, targetMatchers: [obstacle], color: "#ffae00"}, //orange

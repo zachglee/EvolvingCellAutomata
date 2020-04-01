@@ -86,8 +86,9 @@ class Cell extends GameObject {
 	genMutantGenes() {
 		var mutantGenes = this.genes.slice(0, this.genes.length) //get a copy of the genes so we don't mutate the old ones
 		//if (Math.random() < .5) {
-			var genesToRemove = Math.floor(Math.random() * Math.ceil(CELL_GENOME_SIZE / 6)) + 1; //decide how many to remove
-			var genesToAdd = Math.floor(Math.random() * Math.ceil(CELL_GENOME_SIZE / 6)) + 1; //decide how many to add*/
+			var genesToChange = Math.floor(Math.random() * Math.ceil(CELL_GENOME_SIZE / 6)) + 1
+			var genesToRemove = genesToChange; //decide how many to remove
+			var genesToAdd = genesToChange; //decide how many to add*/
 			for (var g = 0; g < genesToRemove; g++) {
 				mutantGenes.splice(Math.floor(Math.random() * mutantGenes.length), 1);
 			}

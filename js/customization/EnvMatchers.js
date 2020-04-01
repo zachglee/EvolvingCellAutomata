@@ -52,10 +52,11 @@ var fat = function(posn, world, asker) {
 const MATCHER_SPEC = {
 	"empty": empty,
 	"obstacle": obstacle,
-	//"cell": cell,
+	"cell": cell,
 	"food": food,
+	"corpse": corpse,
 	/*"cell": cell,*/
-	"fat": fat,
-	"selfCell": selfCell,
-	"foreignCell": foreignCell/*, fat*/
+	"fat": fat
+	//"selfCell": selfCell,
+	//"foreignCell": foreignCell/*, fat*/
 }

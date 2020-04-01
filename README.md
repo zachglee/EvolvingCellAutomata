@@ -2,6 +2,10 @@
 
 Visual in-browswer simulation of digital organisms based on Cellular Automata evolving in varied environments.
 
+## To Run
+
+Clone this repo, then simply open the `index.html` file in your browser. Depending on how the settings are set, you may need to run it several times before you get a population that makes it beyond the first couple thousand ticks.
+
 ## Overview
 
 The simulation is run on a rectangular grid of squares on which organisms move and interact with their environment. There are only a few defined actions which organisms can take (reproduction, movement, etc.) and, like Cellular Automata, each organism has a set of rules that dictate in which situations it will execute certain actions. It is these rules, or 'genes' which are subject to mutation when organisms reproduce.
@@ -67,6 +71,8 @@ See the difference? It's the same set of `Matchers` as before, just rotated 90 d
 
 Normally when a `Cell` reproduces, its child has the exact same `Genes` as it. However, mutation has a chance to occur each reproduction. (Determined by the setting `MUTATION_CHANCE`) When it does occur, the mutant genome is generated using the genMutantGenes() function, which can be implemented however you like. In my case I replace a random number of the parents genes with new randomly generated genes to get the mutatnt child's genes.
 
+Currently, a `Cell`'s genetic makeup has a visual indicator -- the `Cell`'s color. This is a crude indicator, not an exact one, and serves to give just a general sense of the genes of a certain cell. I assign a color to each of the possible `Actions`, for example, Eat may be assigned the color red, Move, the color blue, etc. A `Cell`'s color is produced by mixing the colors of the `Actions` of its genes.
+
 ### Cell Behavior
 
 ### A Few Convenience Data Definitions
@@ -82,3 +88,7 @@ An Obstacle has no special functionality. It just exists to be of type Obstacle,
 
 ### Cell
 A Cell has a list of Genes, an amount of food (int) it has, and then a bunch of bookkeeping data like its age, decay (how many ticks it's spent with food<0), color, and maxFood. (The maximum amount of food the cell can hold.)
+
+## Customization
+
+If you would like to play around with your own settings, I have set up several files in the `customization` folder as a central place to change many of the settings you might be interested in experimenting with.
