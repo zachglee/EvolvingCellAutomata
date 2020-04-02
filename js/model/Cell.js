@@ -34,7 +34,7 @@ class Cell extends GameObject {
 				//once we find a gene that performs its behavior, tick it and remove it from the deck
 				if (this.geneDeck[i].tick(this, posn, world)) {
 					this.geneDeck.splice(i, 1)
-					this.startTickingFromGene = i;
+					//this.startTickingFromGene = i;
 					return;
 				}
 			}
@@ -43,9 +43,14 @@ class Cell extends GameObject {
 				this.geneDeck = this.genes.slice(0, this.genes.length)
 				this.startTickingFromGene = 0;
 			} else {
-				this.geneDeck.splice(0, 1)
-				var inactivityRefundAfterAgePenalty = INACTIVITY_REFUND * (1 - (.0002 * this.age))
-				this.food += inactivityRefundAfterAgePenalty;
+				//this.geneDeck.splice(0, 1)
+				//var inactivityRefundAfterAgePenalty = INACTIVITY_REFUND * (1 - (.0001 * this.age))
+				//this.food += inactivityRefundAfterAgePenalty;
+
+				//Trying out a full gene deck reset whenever we can't act, but it costs food:
+				this.geneDeck = this.genes.slice(0, this.genes.length)
+				this.startTickingFromGene = 0;
+				this.food -= GENE_DECK_RESET_COST
 			}
 			//now if this cell has more food than neighbor cells, transfer some food to them (as if by diffusion through a cell-membrane)
 			this.diffuseFood(posn, world);
@@ -54,6 +59,11 @@ class Cell extends GameObject {
 			this.food = this.maxFood;
 		}
 		this.age += 1;
+		if (Math.floor(this.age % 1000) == 0) {
+			//alert("old boi mutates")
+			this.genes = this.genMutantGenes()
+			this.color = genomeToColor(this.genes)
+		}
 	}
 
 	//transfer any food to neighbor cells if necessary, given that this cell is at the given posn in the given world
@@ -92,7 +102,7 @@ class Cell extends GameObject {
 			for (var g = 0; g < genesToRemove; g++) {
 				mutantGenes.splice(Math.floor(Math.random() * mutantGenes.length), 1);
 			}
-			for (var g = 0; g < genesToRemove; g++) {
+			for (var g = 0; g < genesToAdd; g++) {
 				mutantGenes.splice(Math.floor(Math.random() * mutantGenes.length), 0, genGene());
 			}
 			/*var genesToChange = Math.floor(Math.random() * 4) + 1;

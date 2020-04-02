@@ -29,6 +29,10 @@ var corpse = function(posn, world, asker) {
 	return cell(posn, world, asker) && world.get(posn).content.food < 0;
 }
 
+var fatTarget = function(posn, world, asker) {
+	return cell(posn, world, asker) && world.get(posn).content.food > REPRODUCE_COST;
+}
+
 var selfCell = function(posn, world, asker) {
 	return cell(posn, world, asker) && world.get(posn).content.color === asker.color;
 }
@@ -49,12 +53,19 @@ var fat = function(posn, world, asker) {
 	return asker.food > REPRODUCE_COST;
 }
 
+var lean = function(posn, world, asker) {
+	return asker.food <= REPRODUCE_COST;
+}
+
 const MATCHER_SPEC = {
 	"empty": empty,
 	"obstacle": obstacle,
 	"cell": cell,
 	"food": food,
-	"corpse": corpse,
+	"fatTarget": fatTarget,
+	//"corpse": corpse,
+	//"any": any,
+	"lean": lean,
 	/*"cell": cell,*/
 	"fat": fat
 	//"selfCell": selfCell,

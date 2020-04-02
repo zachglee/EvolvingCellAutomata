@@ -39,12 +39,12 @@ var actionFactory = function(cellCase, squareCase, obstacleCase) {
 const TRANSFER_COST = 1;
 const REPRODUCE_COST = 60;
 const MOVE_COST = 1;
-const EAT_COST = 1;
-const DIG_COST = 3;
+const EAT_COST = 3;
+const DIG_COST = 4;
 const BLOCK_COST = 3;
 const HIBERNATE_COST = 0;
 
-const ABSORB_AMOUNT = 30;
+const ABSORB_AMOUNT = 40;
 const BODY_COST = REPRODUCE_COST / 10;
 const TRANSFER_AMOUNT = 1.5;
 
@@ -156,8 +156,8 @@ var eat = actionFactory(
 			world.get(cellPosn).content = null; // we move onto the cell we eat if it's a corpse
 			//world.get(targetPosn).content = null;
 		} else {
-			target.food -= (ABSORB_AMOUNT * .75);
-			cell.food += (ABSORB_AMOUNT * .75);
+			target.food -= (ABSORB_AMOUNT * .25);
+			cell.food += (ABSORB_AMOUNT * .25);
 			if (target.showEaten) {
 				target.showEaten += 5;
 			} else {
@@ -197,7 +197,7 @@ var dig = actionFactory(
 	},
 	//target = Obstacle
 	function(cell, cellPosn, target, targetPosn, world) {
-		cell.food += BODY_COST * .75;
+		cell.food += BODY_COST * 1.0;
 		if (!target.unbreakable) {
 			world.get(targetPosn).content = cell;
 			world.get(cellPosn).content = null;
@@ -210,20 +210,20 @@ var dig = actionFactory(
 var hibernate = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
-		cell.food += .95;
-		//cell.age -= .9;
+		cell.food += .99;
+		//cell.age -= 1;
 	},
 	//target = Square
 	function(cell, cellPosn, target, targetPosn, world) {
 		//nothing
-		cell.food += .95
-		//cell.age -= .9
+		cell.food += .99
+		//cell.age -= 1
 	},
 	//target = Obstacle
 	function(cell, cellPosn, target, targetPosn, world) {
 		//nothing
-		cell.food += .95
-		//cell.age -= .9
+		cell.food += .99
+		//cell.age -= 1
 	}
 )
 //TODO REMOVE ^^
@@ -231,11 +231,11 @@ var hibernate = actionFactory(
 //This object is the SPOT for what actions are available, as well as their costs, names, and associated colors
 const ACTION_SPEC = {
 	//"transfer": {action: transfer, cost: TRANSFER_COST, targetMatchers: [cell, empty], color: "#00ff00"}, //green
-	"hibernate": {action: hibernate, cost: HIBERNATE_COST, targetMatchers: [cell, empty, any, obstacle], color: "#00ff00"}, //green
-	"reproduce": {action: reproduce, cost: REPRODUCE_COST, targetMatchers: [empty], color: "#fcfcfc"}, //white
-	"move": {action: move, cost: MOVE_COST, targetMatchers: [empty], color: "#004cff"}, //blue
+	"hibernate": {action: hibernate, cost: HIBERNATE_COST, targetMatchers: [cell, empty, obstacle, fatTarget, cell, food], color: "#00ff00"}, //green
+	"reproduce": {action: reproduce, cost: REPRODUCE_COST, targetMatchers: [empty, food], color: "#fcfcfc"}, //white
+	"move": {action: move, cost: MOVE_COST, targetMatchers: [empty, food], color: "#004cff"}, //blue
 	"dig": {action: dig, cost: DIG_COST, targetMatchers: [obstacle], color: "#ffae00"}, //orange
 	//"block": {action: block, cost: BLOCK_COST, targetMatchers: [empty], color: "#ffff00"}, //yellow
 				      /*, hibernate,*/
-	"eat": {action: eat, cost: EAT_COST, targetMatchers: [selfCell, foreignCell], color: "#ff0000"} //red
+	"eat": {action: eat, cost: EAT_COST, targetMatchers: [cell, fatTarget, selfCell, foreignCell], color: "#ff0000"} //red
 };
