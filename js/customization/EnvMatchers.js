@@ -62,7 +62,7 @@ const MATCHER_SPEC = {
 	"obstacle": obstacle,
 	"cell": cell,
 	"food": food,
-	"fatTarget": fatTarget,
+	//"fatTarget": fatTarget,
 	//"corpse": corpse,
 	//"any": any,
 	"lean": lean,

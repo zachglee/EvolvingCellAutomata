@@ -39,7 +39,7 @@ var actionFactory = function(cellCase, squareCase, obstacleCase) {
 const TRANSFER_COST = 1;
 const REPRODUCE_COST = 60;
 const MOVE_COST = 1;
-const EAT_COST = 3;
+const EAT_COST = 6;
 const DIG_COST = 4;
 const BLOCK_COST = 3;
 const HIBERNATE_COST = 0;
@@ -149,21 +149,28 @@ var block = actionFactory(
 var eat = actionFactory(
 	//target = Cell
 	function(cell, cellPosn, target, targetPosn, world) {
-		if  (target.food <= 0) {
+		/*if  (target.food <= 0) {
 			world.cellStats.cellDied(target); //TODO is there a way to make this more elegant?
 			cell.food += (target.food + BODY_COST);
 			world.get(targetPosn).content = cell;
 			world.get(cellPosn).content = null; // we move onto the cell we eat if it's a corpse
 			//world.get(targetPosn).content = null;
 		} else {
-			target.food -= (ABSORB_AMOUNT * .25);
-			cell.food += (ABSORB_AMOUNT * .25);
+			target.food -= (ABSORB_AMOUNT * .3);
+			cell.food += (ABSORB_AMOUNT * .3);
 			if (target.showEaten) {
 				target.showEaten += 5;
 			} else {
 				target.showEaten = 5;
 			}
-		}
+		}*/
+		//trying out making eat actually destroy the target cell and leave all its food on that square.
+		//this way u can have symbiotic relationship where u kill a cell and then others come grab the nutrients
+		//and feed u by diffusion
+		droppedFood = target.food + BODY_COST
+		world.get(targetPosn).content = null
+		world.get(targetPosn).food = droppedFood
+		//world.put(new Square(droppedFood, 0, undefined), targetPosn)
 	},
 	//target = Square
 	function(cell, cellPosn, target, targetPosn, world) {
@@ -231,7 +238,7 @@ var hibernate = actionFactory(
 //This object is the SPOT for what actions are available, as well as their costs, names, and associated colors
 const ACTION_SPEC = {
 	//"transfer": {action: transfer, cost: TRANSFER_COST, targetMatchers: [cell, empty], color: "#00ff00"}, //green
-	"hibernate": {action: hibernate, cost: HIBERNATE_COST, targetMatchers: [cell, empty, obstacle, fatTarget, cell, food], color: "#00ff00"}, //green
+	//"hibernate": {action: hibernate, cost: HIBERNATE_COST, targetMatchers: [cell, empty, obstacle, fatTarget, cell, food], color: "#00ff00"}, //green
 	"reproduce": {action: reproduce, cost: REPRODUCE_COST, targetMatchers: [empty, food], color: "#fcfcfc"}, //white
 	"move": {action: move, cost: MOVE_COST, targetMatchers: [empty, food], color: "#004cff"}, //blue
 	"dig": {action: dig, cost: DIG_COST, targetMatchers: [obstacle], color: "#ffae00"}, //orange

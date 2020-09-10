@@ -99,8 +99,8 @@ class World {
 		for (var i = 0; i < FOOD_SQUARES_PER_TICK; i++) {
 			this.spawnFood(this.randomPosn(), FOOD_PER_SQUARE);
 		}
-		var toTick = [];
-		//for every square on the board, if there's a cell there, gather it into our list to tick
+		
+		//for every square on the board, if there's a cell there, tick it
 		for (var i = 0; i < this.board.length; i++) {
 			var column = this.board[i];
 			for (var j = 0; j < column.length; j++) {
@@ -112,19 +112,10 @@ class World {
 						this.cellStats.cellDied(cell); //let the stats object know a cell died so it can update
 						square.food += BODY_COST;
 					} else {
-						toTick.push({cell: cell, posn: new Posn(i, j)}); //add it to our list of cells to tick()
+						cell.tick(new Posn(i, j), this)
 					}
 				}
 			}
-		}
-		//sort the list of cells and their posns by lowest amount of food
-		toTick.sort(function(a, b) {
-			return a.cell.food - b.cell.food;
-		})
-		//tick every cell in the list
-		for (var i = 0; i < toTick.length; i++) {
-			var posnCell = toTick[i];
-			posnCell.cell.tick(posnCell.posn, this)
 		}
 		this.tickNum++;
 	}
@@ -143,16 +134,18 @@ class World {
 		} else {
 			//console.log("ERROR: Cannot get value - posn out of bounds: " + posn.x + "," + posn.y);
 		}
+		//return this.board[posn.x % this.width][posn.y % this.height]
 	}
 
 
 	//puts the given square at the given posn in this world 
 	put(square, posn) {
-		if (!outOfBounds(posn)) {
-			this.board[posn.x][posn.y] = value;
+		if (!this.outOfBounds(posn)) {
+			this.board[posn.x][posn.y] = square;
 		} else {
 			//console.log("ERROR: Cannot put value - posn out of bounds: " + posn);
 		}
+		//this.board[posn.x % this.width][posn.y % this.height] = value;
 	}
 
 	//renders this World on the given ctx (context object from an HTML5 canvas)
